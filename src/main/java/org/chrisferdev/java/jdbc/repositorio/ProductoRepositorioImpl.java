@@ -34,14 +34,14 @@ public class ProductoRepositorioImpl implements Repositorio<Producto> {
     public Producto porId(Long id) {
         Producto producto = null;
 
-        try(PreparedStatement stmt = getConnection().
+        try (PreparedStatement stmt = getConnection().
                 prepareStatement("SELECT * FROM productos WHERE id = ?")){
             stmt.setLong(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if(rs.next()){
-                producto = crearProducto(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    producto = crearProducto(rs);
+                }
             }
-            rs.close();
         } catch (SQLException e){
             e.printStackTrace();
         }
@@ -50,12 +50,36 @@ public class ProductoRepositorioImpl implements Repositorio<Producto> {
 
     @Override
     public void guardar(Producto producto) {
+        String sql;
+        if (producto.getId() != null && producto.getId() >0) {
+            sql = "UPDATE productos SET nombre=?, precio=? WHERE id=?";
+        } else {
+            sql = "INSERT INTO productos(nombre, precio, fecha_registro) VALUES(?,?,?)";
+        }
+        try(PreparedStatement stmt = getConnection().prepareStatement(sql)){
+            stmt.setString(1, producto.getNombre());
+            stmt.setLong(2, producto.getPrecio());
 
+            if (producto.getId() != null && producto.getId() >0) {
+                stmt.setLong(3, producto.getId());
+            } else {
+                stmt.setDate(3, new Date(producto.getFechaRegistro().getTime()));
+            }
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void eliminar(Long id) {
-
+        try(PreparedStatement stmt = getConnection().prepareStatement("DELETE FROM productos WHERE id=?")){
+            stmt.setLong(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Producto crearProducto(ResultSet rs) throws SQLException {
