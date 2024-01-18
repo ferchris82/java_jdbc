@@ -1,5 +1,6 @@
 package org.chrisferdev.java.jdbc;
 
+import org.chrisferdev.java.jdbc.modelo.Categoria;
 import org.chrisferdev.java.jdbc.modelo.Producto;
 import org.chrisferdev.java.jdbc.repositorio.ProductoRepositorioImpl;
 import org.chrisferdev.java.jdbc.repositorio.Repositorio;
@@ -21,9 +22,12 @@ public class EjemploJdbc {
 
             System.out.println("=========== insertar nuevo producto ===========");
             Producto producto = new Producto();
-            producto.setNombre("Teclado mecánico");
-            producto.setPrecio(500);
+            producto.setNombre("Teclado Razer mecánico");
+            producto.setPrecio(450);
             producto.setFechaRegistro(new Date());
+            Categoria categoria = new Categoria();
+            categoria.setId(3L);
+            producto.setCategoria(categoria);
             repositorio.guardar(producto);
             System.out.println("Producto guardado con éxito");
             repositorio.listar().forEach(System.out::println);
